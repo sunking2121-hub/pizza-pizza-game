@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>比薩拼圖大冒險 Pizza, Pizza!｜幼兒園互動桌遊</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 慶祝撒花畫布 -->
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <!-- 頂部導覽列 -->
+  <header class="top-bar">
+    <div class="brand" id="btn-home" title="回到首頁">
+      <span class="brand-icon">🍕</span>
+      <div class="brand-text">
+        <h1>比薩拼圖 <span class="en">Pizza, Pizza!</span></h1>
+        <p class="subtitle">3–7 歲顏色・形狀互動桌遊</p>
+      </div>
+    </div>
+    <div class="top-controls">
+      <button id="btn-voice" class="icon-pill active" aria-label="語音朗讀開關" title="語音小幫手">
+        <span class="pill-emoji">🗣️</span>
+        <span class="pill-label">語音開</span>
+      </button>
+      <button id="btn-sound" class="icon-pill active" aria-label="音效開關" title="音效開關">
+        <span class="pill-emoji">🔊</span>
+        <span class="pill-label">音效開</span>
+      </button>
+      <button id="btn-help" class="icon-pill" aria-label="怎麼玩" title="怎麼玩">
+        <span class="pill-emoji">❓</span>
+        <span class="pill-label">怎麼玩</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-container">
+    <!-- ==================== 首頁設定畫面 ==================== -->
+    <section id="screen-setup" class="screen active">
+      <div class="setup-card">
+        <div class="hero-banner">
+          <div class="hero-pizza-art" id="hero-pizza-art" aria-hidden="true"></div>
+          <div class="hero-copy">
+            <span class="age-badge">適合 3–7 歲親子・幼兒園共玩</span>
+            <h2>轉轉盤，拼出你的美味大披薩！</h2>
+            <p>依照轉盤轉出的<strong>顏色</strong>或<strong>形狀</strong>找披薩片，小心藏在裡面的<strong>毛毛蟲、臭襪子</strong>等噁心配料，翻到要趕快丟進垃圾桶喔！</p>
+          </div>
+        </div>
+
+        <div class="setup-grid">
+          <!-- 遊戲模式 -->
+          <div class="setup-box">
+            <h3>1. 選擇玩法難度</h3>
+            <div class="mode-options" id="mode-options">
+              <button class="choice-card selected" data-mode="either">
+                <span class="choice-icon">🌈</span>
+                <strong>基礎模式（推薦 3–5 歲）</strong>
+                <small>顏色<strong>或</strong>形狀符合其中一個就能選！</small>
+              </button>
+              <button class="choice-card" data-mode="both">
+                <span class="choice-icon">⭐</span>
+                <strong>挑戰模式（適合 5–7 歲）</strong>
+                <small>顏色<strong>而且</strong>形狀兩個都要符合！</small>
+              </button>
+            </div>
+          </div>
+
+          <!-- 玩家人數 -->
+          <div class="setup-box">
+            <h3>2. 幾位小廚師一起玩？</h3>
+            <div class="count-pills" id="player-count-pills">
+              <button class="count-pill" data-count="1">1 人練習</button>
+              <button class="count-pill selected" data-count="2">2 人玩</button>
+              <button class="count-pill" data-count="3">3 人玩</button>
+              <button class="count-pill" data-count="4">4 人玩</button>
+            </div>
+            <label class="bot-toggle" id="bot-toggle-wrap">
+              <input type="checkbox" id="chk-with-bot" />
+              <span class="toggle-track"></span>
+              <span class="toggle-text">讓最後一位由「🤖 小熊電腦」陪玩</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 玩家角色設定 -->
+        <div class="setup-box players-setup-box">
+          <h3>3. 幫小廚師挑頭像與名字</h3>
+          <div class="players-config-list" id="players-config-list"></div>
+        </div>
+
+        <div class="start-actions">
+          <button id="btn-start-game" class="btn-primary btn-huge">
+            <span>🍕 開始做披薩！</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 遊戲主畫面 ==================== -->
+    <section id="screen-game" class="screen">
+      <!-- 頂部回合與提示橫幅 -->
+      <div class="turn-banner" id="turn-banner">
+        <div class="turn-player-info">
+          <span class="turn-avatar" id="turn-avatar">🐻</span>
+          <div>
+            <div class="turn-title" id="turn-title">輪到 小熊大廚！</div>
+            <div class="turn-instruction" id="turn-instruction">按一下「轉動轉盤」開始這一回合吧！</div>
+          </div>
+        </div>
+        <div class="turn-actions">
+          <button id="btn-hint" class="btn-soft" title="給小朋友一個小提示" disabled>💡 小提示</button>
+          <button id="btn-restart" class="btn-soft">🔄 重新開始</button>
+        </div>
+      </div>
+
+      <!-- 主遊戲區：左側轉盤＆垃圾桶，中間桌面披薩片，右側／下方玩家披薩盤 -->
+      <div class="game-layout">
+        <!-- 左欄：雙轉盤 + 垃圾桶 -->
+        <aside class="left-panel">
+          <div class="spinner-station">
+            <div class="spinners-row">
+              <!-- 顏色轉盤 -->
+              <div class="spinner-wrap">
+                <div class="spinner-label">顏色轉盤</div>
+                <div class="wheel-frame">
+                  <div class="wheel-pointer">▼</div>
+                  <svg id="wheel-color" class="wheel-svg" viewBox="0 0 200 200" aria-label="顏色轉盤"></svg>
+                </div>
+              </div>
+              <!-- 形狀轉盤 -->
+              <div class="spinner-wrap">
+                <div class="spinner-label">形狀轉盤</div>
+                <div class="wheel-frame">
+                  <div class="wheel-pointer">▼</div>
+                  <svg id="wheel-shape" class="wheel-svg" viewBox="0 0 200 200" aria-label="形狀轉盤"></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- 轉盤結果顯示徽章 -->
+            <div class="spin-result-box" id="spin-result-box">
+              <span class="spin-placeholder">轉動雙轉盤，看看要找什麼配料！</span>
+            </div>
+
+            <button id="btn-spin" class="btn-spin">
+              <span class="spin-btn-icon">🎯</span>
+              <span>轉動轉盤！</span>
+            </button>
+          </div>
+
+          <!-- 垃圾桶互動區 -->
+          <div class="trash-station" id="trash-station">
+            <div class="trash-header">
+              <span>🗑️ 噁心配料垃圾桶</span>
+              <span class="trash-count" id="trash-count">已丟 0 片</span>
+            </div>
+            <button class="trash-bin-btn" id="trash-bin-btn" type="button" aria-label="垃圾桶">
+              <div class="trash-lid" id="trash-lid">
+                <div class="trash-handle"></div>
+              </div>
+              <div class="trash-body">
+                <div class="trash-face">😝</div>
+                <div class="trash-lines"><span></span><span></span><span></span></div>
+              </div>
+            </button>
+            <div class="trash-hint" id="trash-hint">翻到毛毛蟲或臭襪子時，點我丟進來！</div>
+          </div>
+        </aside>
+
+        <!-- 中央：桌面披薩配料卡片區 -->
+        <section class="table-panel">
+          <div class="panel-header">
+            <h3>🍽️ 桌面披薩片（點一片翻開看看！）</h3>
+            <span class="deck-status" id="deck-status">剩餘 16 片</span>
+          </div>
+          <div class="slices-grid" id="slices-grid"></div>
+        </section>
+
+        <!-- 右欄／下方：所有玩家的披薩盤 -->
+        <section class="boards-panel">
+          <div class="panel-header">
+            <h3>👨‍🍳 小廚師們的披薩盤（拼滿 6 片就贏囉！）</h3>
+          </div>
+          <div class="player-boards" id="player-boards"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== 翻開卡片特寫彈窗（美味 / 噁心） ==================== -->
+  <div id="modal-reveal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="reveal-card" id="reveal-card">
+      <div class="reveal-badge" id="reveal-badge">美味配料！</div>
+      <div class="reveal-art" id="reveal-art"></div>
+      <h2 class="reveal-title" id="reveal-title">起司番茄披薩</h2>
+      <p class="reveal-desc" id="reveal-desc">太棒了！放進你的披薩盤吧！</p>
+      <div class="reveal-actions" id="reveal-actions"></div>
+    </div>
+  </div>
+
+  <!-- ==================== 勝利慶祝彈窗 ==================== -->
+  <div id="modal-victory" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="victory-card">
+      <div class="victory-crown">👑</div>
+      <h2 id="victory-title">小熊大廚 完成了美味大披薩！</h2>
+      <p id="victory-subtitle">太厲害了！6 片美味披薩全部拼滿囉！</p>
+      <div class="victory-pizza-showcase" id="victory-pizza-showcase"></div>
+      <div class="victory-stats" id="victory-stats"></div>
+      <div class="victory-actions">
+        <button id="btn-play-again" class="btn-primary btn-large">🍕 再玩一局！</button>
+        <button id="btn-back-setup" class="btn-soft btn-large">⚙️ 換人數或難度</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 玩法說明彈窗 ==================== -->
+  <div id="modal-help" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="help-card">
+      <button class="modal-close" id="btn-close-help" aria-label="關閉">✕</button>
+      <h2>🍕 《比薩拼圖》怎麼玩？</h2>
+      <ol class="help-steps">
+        <li>
+          <span class="step-num">1</span>
+          <div>
+            <strong>轉動雙轉盤</strong>
+            <p>按下「轉動轉盤」，左邊會轉出一個<strong>顏色</strong>，右邊會轉出一個<strong>形狀</strong>。</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <div>
+            <strong>找找看配對的披薩片</strong>
+            <p><strong>基礎模式</strong>：只要顏色<strong>或</strong>形狀其中一個符合就能點！<br><strong>挑戰模式</strong>：顏色<strong>和</strong>形狀兩個都要符合喔！</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <div>
+            <strong>翻開看驚喜！</strong>
+            <p>翻到<strong>美味配料</strong>（番茄、鳳梨、起司、蘑菇…）就可以放進自己的披薩盤！<br>如果不小心翻到<strong>蟲子、蜘蛛、臭襪子</strong>等「噁心配料」，就要哈哈大笑並把它丟進垃圾桶！</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">4</span>
+          <div>
+            <strong>拼滿 6 片就獲勝！</strong>
+            <p>最快把自己的大披薩拼滿 6 片美味配料的小廚師就是今天的披薩冠軍！</p>
+          </div>
+        </li>
+      </ol>
+      <button id="btn-help-ok" class="btn-primary">我知道了，開始玩！</button>
+    </div>
+  </div>
+
+  <!-- 輕提示 Toast -->
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="game.js"></script>
+</body>
+</html>
