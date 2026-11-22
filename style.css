@@ -129,6 +129,7 @@ html, body {
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 700;
+  text-decoration: none;
   cursor: pointer;
   box-shadow: 0 3px 0 #ead2b4;
   transition: transform 0.12s ease, background 0.15s ease;

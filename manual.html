@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>比薩拼圖（Pizza, Pizza!）實體卡牌遊戲使用說明書</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Fredoka', 'Noto Sans TC', system-ui, sans-serif;
+      background: #efe7dc;
+      color: #3c2618;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: rgba(255, 250, 241, 0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 3px solid #ecc99b;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: #c82828;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tb-btn {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 2.5px solid #e2c59d;
+      background: #fff;
+      color: #3c2618;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tb-btn.primary {
+      background: linear-gradient(180deg, #ff6259 0%, #ef4444 100%);
+      border-color: #b91c1c;
+      color: #fff;
+      box-shadow: 0 3px 0 #b91c1c;
+    }
+
+    .pages-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      padding: 18px 0 40px;
+    }
+
+    .manual-page {
+      width: 210mm;
+      min-height: 297mm;
+      background: #fffdf8;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+      padding: 13mm 15mm 14mm;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 5.5mm;
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .manual-page:last-child {
+      page-break-after: auto;
+      break-after: auto;
+    }
+
+    .hero-header {
+      background: linear-gradient(135deg, #fff1d6 0%, #ffe4cc 100%);
+      border: 1mm solid #f3b562;
+      border-radius: 6mm;
+      padding: 5.5mm 7mm;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6mm;
+    }
+
+    .hero-title h2 {
+      margin: 0 0 1.5mm;
+      font-size: 20pt;
+      color: #c82828;
+      line-height: 1.15;
+    }
+
+    .hero-title p {
+      margin: 0;
+      font-size: 10pt;
+      font-weight: 700;
+      color: #6d4f3b;
+    }
+
+    .meta-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2.5mm;
+      justify-content: flex-end;
+      max-width: 78mm;
+    }
+
+    .meta-pill {
+      padding: 1.5mm 3.5mm;
+      border-radius: 999px;
+      background: #fff;
+      border: 0.6mm solid #eab364;
+      font-size: 8.8pt;
+      font-weight: 900;
+      color: #3c2618;
+    }
+
+    .section-box {
+      background: #ffffff;
+      border: 0.7mm solid #efd6b5;
+      border-radius: 5mm;
+      padding: 4.5mm 6mm;
+    }
+
+    .section-box.highlight-box {
+      background: #fff9eb;
+      border-color: #f59e0b;
+    }
+
+    .section-box.purple-box {
+      background: #faf5ff;
+      border-color: #c4b5fd;
+    }
+
+    .section-title {
+      margin: 0 0 3mm;
+      font-size: 12.5pt;
+      font-weight: 900;
+      color: #b91c1c;
+      display: flex;
+      align-items: center;
+      gap: 2mm;
+    }
+
+    .purple-box .section-title {
+      color: #6d28d9;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4.5mm;
+    }
+
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+    }
+
+    .spec-table th,
+    .spec-table td {
+      border: 0.4mm solid #ecd6b8;
+      padding: 2mm 3mm;
+      text-align: left;
+    }
+
+    .spec-table th {
+      background: #fff3da;
+      font-weight: 900;
+    }
+
+    .steps-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2.8mm;
+    }
+
+    .steps-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 3mm;
+      font-size: 9.4pt;
+      line-height: 1.48;
+    }
+
+    .step-badge {
+      width: 6.5mm;
+      height: 6.5mm;
+      border-radius: 50%;
+      background: #ef4444;
+      color: #fff;
+      font-size: 9pt;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 0.3mm;
+    }
+
+    .mode-card {
+      background: #fffcf6;
+      border: 0.6mm solid #ecd2b0;
+      border-radius: 4mm;
+      padding: 3.5mm 4.5mm;
+      font-size: 9pt;
+      line-height: 1.48;
+    }
+
+    .mode-card h4 {
+      margin: 0 0 1.5mm;
+      font-size: 10.5pt;
+      color: #3c2618;
+    }
+
+    .bullet-list {
+      margin: 0;
+      padding-left: 5mm;
+      font-size: 9.2pt;
+      line-height: 1.55;
+    }
+
+    .bullet-list li {
+      margin-bottom: 1.4mm;
+    }
+
+    .color-row {
+      display: flex;
+      gap: 3mm;
+      flex-wrap: wrap;
+      margin-top: 2mm;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 1.5mm;
+      padding: 1mm 3mm;
+      border-radius: 999px;
+      font-size: 8.5pt;
+      font-weight: 800;
+      background: #fff;
+      border: 0.5mm solid #e5caa7;
+    }
+
+    .dot {
+      width: 3.2mm;
+      height: 3.2mm;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .url-banner {
+      margin-top: 2.5mm;
+      padding: 2.5mm 4mm;
+      border-radius: 3mm;
+      background: #fee2e2;
+      border: 0.5mm dashed #ef4444;
+      font-size: 9pt;
+      font-weight: 800;
+      color: #991b1b;
+    }
+
+    .page-footer {
+      margin-top: auto;
+      padding-top: 2mm;
+      border-top: 0.4mm dashed #e4c8a2;
+      display: flex;
+      justify-content: space-between;
+      font-size: 8pt;
+      font-weight: 700;
+      color: #8f6f54;
+    }
+
+    @media print {
+      body { background: #fff; }
+      .no-print { display: none !important; }
+      .pages-wrap { padding: 0; gap: 0; }
+      .manual-page { box-shadow: none; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="toolbar no-print">
+    <h1>📖 《比薩拼圖》實體卡牌遊戲使用說明書</h1>
+    <div class="toolbar-actions">
+      <a class="tb-btn" href="print-cards.html">🃏 6.3×8.8cm 卡牌列印頁</a>
+      <a class="tb-btn" href="index.html">🎮 開啟互動轉盤</a>
+      <button class="tb-btn primary" onclick="window.print()">🖨️ 列印說明書 / 存成 PDF</button>
+    </div>
+  </header>
+
+  <main class="pages-wrap">
+    <!-- ==================== 第 1 頁：遊戲介紹、配件、主要玩法 ==================== -->
+    <article class="manual-page">
+      <div class="hero-header">
+        <div class="hero-title">
+          <h2>🍕 比薩拼圖大冒險<br/>實體卡牌使用說明書</h2>
+          <p>Pizza, Pizza!｜可單獨遊玩・也可搭配互動網頁雙轉盤！</p>
+        </div>
+        <div class="meta-pills">
+          <span class="meta-pill">👶 3–7 歲適用</span>
+          <span class="meta-pill">👨‍👩‍👧‍👦 1–4 人同樂</span>
+          <span class="meta-pill">⏱️ 約 10–15 分鐘</span>
+          <span class="meta-pill">🃏 6.3 × 8.8 cm</span>
+        </div>
+      </div>
+
+      <!-- 配件清單 -->
+      <section class="section-box">
+        <h3 class="section-title">📦 一、全套卡牌配件清單（共 36 張，實寸 6.3 × 8.8 cm）</h3>
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th>卡片種類</th>
+              <th>張數</th>
+              <th>說明與用途</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>😋 美味披薩配料卡</strong></td>
+              <td><strong>24 張</strong></td>
+              <td>共 8 種美味配料（起司番茄、義式臘腸、夏威夷鳳梨、玉米蘑菇、翠綠花椰菜、鮮甜鮮蝦、彩虹彩椒、雙倍起司）各 3 張。收集滿 6 張就獲勝！</td>
+            </tr>
+            <tr>
+              <td><strong>😝 噁心配料卡</strong></td>
+              <td><strong>8 張</strong></td>
+              <td>藏有扭扭毛毛蟲、臭呼呼襪子、害羞小蜘蛛、大甲蟲、魚骨頭、小蛞蝓。4 色與 4 形狀各均勻藏 2 張，翻到要大笑並丟進垃圾桶！</td>
+            </tr>
+            <tr>
+              <td><strong>🌈 主廚萬能披薩卡</strong></td>
+              <td><strong>2 張</strong></td>
+              <td>萬能顏色＆萬能形狀的幸運牌！不管轉到什麼都能挑選，翻開直接算 1 片美味披薩！</td>
+            </tr>
+            <tr>
+              <td><strong>🗑️ 噁心配料垃圾桶卡</strong></td>
+              <td><strong>1 張</strong></td>
+              <td><strong>不洗入牌堆</strong>，直接平放在桌子中央當「垃圾桶基地」，翻到的噁心披薩全丟在上面！</td>
+            </tr>
+            <tr>
+              <td><strong>📱 數位轉盤連動卡</strong></td>
+              <td><strong>1 張</strong></td>
+              <td><strong>不洗入牌堆</strong>，印有互動網站 QR Code 與速查規則，手機一掃就能啟動聲光雙轉盤！</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="color-row">
+          <span class="chip"><span class="dot" style="background:#ef4444"></span>紅色</span>
+          <span class="chip"><span class="dot" style="background:#f59e0b"></span>黃色</span>
+          <span class="chip"><span class="dot" style="background:#22c55e"></span>綠色</span>
+          <span class="chip"><span class="dot" style="background:#3b82f6"></span>藍色</span>
+          <span class="chip">● 圓形</span>
+          <span class="chip">▲ 三角形</span>
+          <span class="chip">■ 正方形</span>
+          <span class="chip">★ 星形</span>
+        </div>
+      </section>
+
+      <!-- 遊戲準備 -->
+      <section class="section-box highlight-box">
+        <h3 class="section-title">🍽️ 二、遊戲開始前準備（1 分鐘擺桌）</h3>
+        <ol class="steps-list">
+          <li><span class="step-badge">1</span><div>把 <strong>#35 垃圾桶卡</strong> 放在桌子正中央（或大家伸手拍得到的地方）；<strong>#36 數位連動卡</strong> 放一旁備查。</div></li>
+          <li><span class="step-badge">2</span><div>將其餘 <strong>34 張披薩卡</strong>（含美味 24 張、噁心 8 張、萬能 2 張）洗勻，<strong>「顏色・形狀配對面」朝上</strong>（也就是看不到裡面是美味還是毛毛蟲！）在桌上排開 <strong>12～16 張</strong>（剩下的當補牌堆）。</div></li>
+          <li><span class="step-badge">3</span><div>決定玩法難度：<strong>基礎模式（3–5 歲）</strong>只要符合顏色<strong>或</strong>形狀就能選；<strong>挑戰模式（5–7 歲）</strong>必須顏色<strong>而且</strong>形狀兩個都符合！</div></li>
+        </ol>
+      </section>
+
+      <!-- 玩法一：虛實整合 -->
+      <section class="section-box">
+        <h3 class="section-title">🎯 三、玩法一：虛實整合雙轉盤（最推薦！搭配互動網站）</h3>
+        <ol class="steps-list">
+          <li><span class="step-badge">1</span><div>用手機或平板開啟互動網頁，按下<strong>「轉動轉盤！」</strong>，讓系統轉出本回合的<strong>顏色</strong>與<strong>形狀</strong>（還會有可愛中文語音朗讀喔！）。</div></li>
+          <li><span class="step-badge">2</span><div>輪到的小朋友從桌面上，找出符合條件的 <strong>實體披薩卡</strong>（或直接挑彩虹萬能卡）並<strong>親手翻開</strong>！</div></li>
+          <li><span class="step-badge">3</span><div><strong>翻到美味配料 😋：</strong>大喊披薩名稱，開心地排在自己面前！排成一排或圍成圓形，集滿 <strong>6 片</strong> 就完成大披薩！</div></li>
+          <li><span class="step-badge">4</span><div><strong>翻到噁心配料 😝：</strong>全場一起哈哈大笑大喊「好噁心喔！」，小朋友把這張牌<strong>拍丟到中央的垃圾桶卡上</strong>！（若翻開桌上張數變少，可從補牌堆補 1 張回桌面）</div></li>
+          <li><span class="step-badge">5</span><div>換下一位小廚師轉轉盤！<strong>最先收集滿 6 片美味披薩卡</strong>的玩家獲勝！</div></li>
+        </ol>
+        <div class="url-banner">🌐 互動轉盤網址：https://sunking2121-hub.github.io/pizza-pizza-game/</div>
+      </section>
+
+      <div class="page-footer">
+        <span>比薩拼圖大冒險 Pizza, Pizza!｜6.3 × 8.8 cm 實體卡牌說明書</span>
+        <span>第 1 頁 / 共 2 頁</span>
+      </div>
+    </article>
+
+    <!-- ==================== 第 2 頁：免螢幕玩法、分齡引導、列印製作教學 ==================== -->
+    <article class="manual-page">
+      <!-- 免螢幕玩法與幼兒延伸玩法 -->
+      <section class="section-box">
+        <h3 class="section-title">🃏 四、免螢幕也能玩！兩種延伸實體玩法</h3>
+        <div class="two-col">
+          <div class="mode-card">
+            <h4>🎲 玩法二：純卡牌接龍翻翻樂（免手機）</h4>
+            <p style="margin:0 0 2mm">沒有網路或想護眼時，直接用這副牌就能玩！</p>
+            <ul class="bullet-list" style="padding-left:4.2mm">
+              <li>桌面同樣排開 12 張「配對面朝上」的牌，剩下的疊成中央<strong>「目標牌堆」</strong>。</li>
+              <li>輪到你時，先看目標牌堆<strong>最上面那張牌的顏色與形狀</strong>當作本回合條件。</li>
+              <li>從桌面挑 1 張<strong>同顏色或同形狀</strong>的牌翻開！美味就收走，噁心就丟垃圾桶。</li>
+              <li>回合結束把目標牌堆最上面那張放進牌堆底，換下一個人！</li>
+            </ul>
+          </div>
+          <div class="mode-card">
+            <h4>👩‍🍳 玩法三：小小披薩店點餐（3–4 歲幼幼版）</h4>
+            <p style="margin:0 0 2mm">非常適合幼兒園團體活動或親子扮家家酒！</p>
+            <ul class="bullet-list" style="padding-left:4.2mm">
+              <li>大人或老師扮演客人，點餐說：「老闆，我要一片<strong>紅色的圓形</strong>披薩！」</li>
+              <li>小朋友在桌上找出對應卡片並翻過來檢查：「耶！是起司番茄披薩，請慢用！」</li>
+              <li>如果翻到毛毛蟲或臭襪子，老闆要趕快說：「哎呀烤壞了，丟垃圾桶重做一片！」</li>
+              <li><strong>合作過關：</strong>全班／親子一起合力做出 6 片美味披薩就大成功！</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 難度與勝負細節 -->
+      <section class="section-box purple-box">
+        <h3 class="section-title">⭐ 五、常見小狀況與貼心規則（Q&amp;A）</h3>
+        <ul class="bullet-list">
+          <li><strong>Q：挑戰模式（顏色＋形狀都要對）時，桌上剛好沒有符合的牌怎麼辦？</strong><br/>A：別擔心！可以從補牌堆直接再補 2 張到桌上，或是給小朋友一個「主廚獎勵」，直接任選桌上 1 張牌翻開！</li>
+          <li><strong>Q：小朋友年紀較小（3 歲），輸了容易哭怎麼辦？</strong><br/>A：建議改用<strong>「全員合作模式」</strong>，大家共用一個大披薩盤，目標是在「垃圾桶滿 5 片噁心披薩之前」合力拼滿 6 片美味披薩，全體一起贏最開心！</li>
+          <li><strong>Q：想要增加遊戲長度或給大班（6–7 歲）更多挑戰？</strong><br/>A：除了開啟「挑戰模式」，也可以規定「收集的 6 片披薩必須包含至少 4 種不同配料」，或是「先湊滿 8 片獲勝」！</li>
+        </ul>
+      </section>
+
+      <!-- 6.3 x 8.8 cm 製作與列印教學 -->
+      <section class="section-box highlight-box">
+        <h3 class="section-title">✂️ 六、6.3 × 8.8 cm 實體卡牌列印、裁切與卡套指南</h3>
+        <ol class="steps-list">
+          <li><span class="step-badge">1</span><div><strong>紙張建議：</strong>推薦使用 <strong>A4 200g–250g 雲彩紙／西卡紙／雪銅紙</strong>，拿在手裡厚實耐折；若用一般 80g 影印紙，可搭配厚卡套或護貝使用。</div></li>
+          <li><span class="step-badge">2</span><div><strong>精準尺寸設定：</strong>開啟 <code>print-cards.html</code> 點擊「列印 / 另存 PDF」，務必選擇 <strong>A4 直向</strong>、<strong>縮放比例 100%（實際大小）</strong>、<strong>邊界：無</strong>。印出第 1 頁後，請用直尺量測頁首的 <strong>5 公分校準尺</strong>，確認無縮放誤差！</div></li>
+          <li><span class="step-badge">3</span><div><strong>雙面列印對齊：</strong>所有背面頁皆已完成<strong>水平鏡像與幾何置中</strong>，雙面印表機直接選<strong>「長邊翻面」</strong>即可正反完美對齊！若為單面印表機，可選「只印配對面（4 頁）」印完後整疊翻面放回紙匣，再印「只印配料面（4 頁）」。</div></li>
+          <li><span class="step-badge">4</span><div><strong>保護升級：</strong>6.3 × 8.8 cm 為國際標準桌遊／寶可夢卡尺寸，裁切完成後可直接裝入市售 <strong>65 × 90 mm 透明厚卡套</strong>（超耐口水與反覆洗牌！），或用圓角器修圓四角更安全不刮手。</div></li>
+        </ol>
+      </section>
+
+      <!-- 幼兒園老師／家長共玩引導 -->
+      <section class="section-box">
+        <h3 class="section-title">💡 七、給家長與幼兒園老師的教學引導小撇步</h3>
+        <div class="two-col">
+          <ul class="bullet-list">
+            <li><strong>語言表達練習：</strong>鼓勵孩子翻開前念出來：「我找的是<strong>藍色</strong>的<strong>星形</strong>！」翻開後說出食材名稱與口感。</li>
+            <li><strong>數數與分類：</strong>每拿一片就一起點數「1、2、3…還差幾片就滿 6 片？」自然融入 6 以內加減概念。</li>
+          </ul>
+          <ul class="bullet-list">
+            <li><strong>正向情緒練習：</strong>翻到臭襪子或毛毛蟲時，大人先誇張大笑示範「哇哈哈哈好臭喔～快丟掉！」，幫助孩子用幽默看待「沒拿到分」的小挫折。</li>
+            <li><strong>輪流與專注：</strong>等待別人回合時，可以邀請大家一起幫轉盤加油「轉轉轉～停！」，讓每位小朋友都高度參與！</li>
+          </ul>
+        </div>
+      </section>
+
+      <div class="page-footer">
+        <span>比薩拼圖大冒險 Pizza, Pizza!｜6.3 × 8.8 cm 實體卡牌說明書</span>
+        <span>第 2 頁 / 共 2 頁</span>
+      </div>
+    </article>
+  </main>
+</body>
+</html>

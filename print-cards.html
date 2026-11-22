@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>比薩拼圖 6.3×8.8cm 實體卡牌列印版（共 36 張）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Fredoka', 'Noto Sans TC', system-ui, sans-serif;
+      background: #efe7dc;
+      color: #3c2618;
+    }
+
+    /* ==================== 螢幕端列印控制台（列印時自動隱藏） ==================== */
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 500;
+      background: rgba(255, 250, 241, 0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 3px solid #ecc99b;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 16px rgba(60, 38, 24, 0.1);
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: #c82828;
+    }
+
+    .spec-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #92400e;
+    }
+
+    .toolbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tb-btn {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 2.5px solid #e2c59d;
+      background: #fff;
+      color: #3c2618;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tb-btn.active {
+      background: #fff2cc;
+      border-color: #f59e0b;
+    }
+
+    .tb-btn.primary {
+      background: linear-gradient(180deg, #ff6259 0%, #ef4444 100%);
+      border-color: #b91c1c;
+      color: #fff;
+      box-shadow: 0 3px 0 #b91c1c;
+    }
+
+    .print-notice {
+      max-width: 210mm;
+      margin: 14px auto 0;
+      padding: 12px 16px;
+      background: #fff9eb;
+      border: 2.5px solid #f2c683;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .print-notice strong {
+      color: #b91c1c;
+    }
+
+    /* ==================== A4 列印版面（精準幾何置中） ==================== */
+    .sheets-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      padding: 18px 0 40px;
+    }
+
+    .a4-sheet {
+      position: relative;
+      width: 210mm;
+      height: 297mm;
+      background: #ffffff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+      /* 精準幾何置中：左右各 10.5mm，上下各 16.5mm，確保雙面列印 100% 對齊 */
+      padding: 16.5mm 10.5mm;
+      overflow: hidden;
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .a4-sheet:last-child {
+      page-break-after: auto;
+      break-after: auto;
+    }
+
+    .sheet-header {
+      position: absolute;
+      top: 5mm;
+      left: 10.5mm;
+      right: 10.5mm;
+      height: 9mm;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: #7c5c43;
+    }
+
+    .sheet-footer {
+      position: absolute;
+      bottom: 4.5mm;
+      left: 10.5mm;
+      right: 10.5mm;
+      height: 8mm;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 8pt;
+      font-weight: 700;
+      color: #9c7d63;
+    }
+
+    /* 5 公分實體尺規校準條 */
+    .ruler-5cm {
+      display: inline-flex;
+      align-items: center;
+      gap: 2mm;
+    }
+
+    .ruler-bar {
+      width: 50mm;
+      height: 3.2mm;
+      border: 0.35mm solid #3c2618;
+      background: repeating-linear-gradient(
+        90deg,
+        #3c2618 0,
+        #3c2618 10mm,
+        #ffffff 10mm,
+        #ffffff 20mm
+      );
+      display: inline-block;
+    }
+
+    /* 3×3 精準卡牌網格：189mm × 264mm */
+    .cards-grid {
+      width: 189mm;
+      height: 264mm;
+      display: grid;
+      grid-template-columns: repeat(3, 63mm);
+      grid-template-rows: repeat(3, 88mm);
+      gap: 0;
+    }
+
+    /* ==================== 單張卡牌：精準 6.3cm × 8.8cm ==================== */
+    .card {
+      width: 63mm;
+      height: 88mm;
+      padding: 3.2mm;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: #fffdf8;
+      overflow: hidden;
+    }
+
+    body.show-cutlines .card {
+      outline: 0.25mm dashed #b9a48d;
+      outline-offset: -0.125mm;
+    }
+
+    .card-inner {
+      flex: 1;
+      border-radius: 4.2mm;
+      border: 1.1mm solid #e8a756;
+      background: #fffcf5;
+      padding: 2.6mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 卡片正面（顏色・形狀配對面） */
+    .card-front .card-inner {
+      background-image:
+        radial-gradient(rgba(232, 167, 86, 0.14) 0.7mm, transparent 0.7mm);
+      background-size: 4.5mm 4.5mm;
+    }
+
+    .corner-badge {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6mm;
+      font-size: 7pt;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .corner-tl { top: 2.2mm; left: 2.4mm; }
+    .corner-br { bottom: 2.2mm; right: 2.4mm; transform: rotate(180deg); }
+
+    .corner-dot {
+      width: 4.2mm;
+      height: 4.2mm;
+      border-radius: 50%;
+      border: 0.4mm solid rgba(0, 0, 0, 0.18);
+    }
+
+    .front-header {
+      font-size: 7.5pt;
+      font-weight: 900;
+      color: #8c6343;
+      letter-spacing: 0.4px;
+      margin-top: 0.5mm;
+    }
+
+    .front-art {
+      width: 39mm;
+      height: 41mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .front-art svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .front-label {
+      padding: 1.4mm 4mm;
+      border-radius: 999px;
+      font-size: 10pt;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0.6mm 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .front-foot {
+      font-size: 6.5pt;
+      font-weight: 700;
+      color: #a47e5c;
+    }
+
+    /* 卡片翻開面（美味／噁心配料面） */
+    .card-back.is-yummy .card-inner {
+      border-color: #22c55e;
+      background: linear-gradient(180deg, #f0fdf4 0%, #fffef8 55%, #fefce8 100%);
+    }
+
+    .card-back.is-yucky .card-inner {
+      border-color: #7c3aed;
+      background: linear-gradient(180deg, #f3e8ff 0%, #faf5ff 55%, #ecfccb 100%);
+    }
+
+    .back-pill {
+      padding: 1.1mm 3.6mm;
+      border-radius: 999px;
+      font-size: 8pt;
+      font-weight: 900;
+    }
+
+    .is-yummy .back-pill {
+      background: #dcfce7;
+      color: #15803d;
+      border: 0.4mm solid #86efac;
+    }
+
+    .is-yucky .back-pill {
+      background: #ede9fe;
+      color: #6d28d9;
+      border: 0.4mm solid #c4b5fd;
+    }
+
+    .back-art {
+      width: 38mm;
+      height: 39mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .back-art svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .back-title {
+      font-size: 11.5pt;
+      font-weight: 900;
+      color: #3c2618;
+      text-align: center;
+      line-height: 1.15;
+    }
+
+    .back-desc {
+      font-size: 7.4pt;
+      font-weight: 700;
+      color: #6d4f3b;
+      text-align: center;
+      line-height: 1.35;
+      padding: 0 1mm;
+    }
+
+    .back-action {
+      width: 100%;
+      text-align: center;
+      padding: 1.4mm 2mm;
+      border-radius: 2.5mm;
+      font-size: 8pt;
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    .is-yummy .back-action {
+      background: #22c55e;
+    }
+
+    .is-yucky .back-action {
+      background: #7c3aed;
+    }
+
+    .card-num {
+      position: absolute;
+      bottom: 1.3mm;
+      right: 2.2mm;
+      font-size: 6pt;
+      font-weight: 800;
+      color: rgba(60, 38, 24, 0.35);
+    }
+
+    /* 特殊卡樣式 */
+    .card-special-wild .card-inner {
+      border-color: #f59e0b;
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 45%, #ffedd5 100%);
+    }
+
+    .card-special-trash .card-inner {
+      border-color: #6d28d9;
+      background: linear-gradient(180deg, #ede9fe 0%, #ddd6fe 100%);
+    }
+
+    .card-special-web .card-inner {
+      border-color: #ef4444;
+      background: linear-gradient(180deg, #fff5f5 0%, #fffbeb 100%);
+    }
+
+    .qr-box {
+      width: 32mm;
+      height: 32mm;
+      background: #fff;
+      border: 0.7mm solid #ef4444;
+      border-radius: 3mm;
+      padding: 1.5mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .url-chip {
+      font-family: 'Fredoka', monospace;
+      font-size: 6.2pt;
+      font-weight: 700;
+      color: #b91c1c;
+      background: #fee2e2;
+      padding: 1mm 2mm;
+      border-radius: 2mm;
+      word-break: break-all;
+      text-align: center;
+    }
+
+    /* 篩選顯示模式 */
+    body.mode-front-only .sheet-back { display: none; }
+    body.mode-back-only .sheet-front { display: none; }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .sheets-container {
+        padding: 0;
+        gap: 0;
+      }
+      .a4-sheet {
+        box-shadow: none;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body class="show-cutlines">
+  <header class="toolbar no-print">
+    <div class="toolbar-left">
+      <h1>🃏 比薩拼圖實體卡牌列印版</h1>
+      <span class="spec-badge">精準尺寸：寬 6.3 cm × 高 8.8 cm（全套 36 張）</span>
+    </div>
+    <div class="toolbar-controls">
+      <button class="tb-btn active" data-view="all">雙面全印（8 頁 A4）</button>
+      <button class="tb-btn" data-view="front">只印配對面（4 頁）</button>
+      <button class="tb-btn" data-view="back">只印配料面（4 頁）</button>
+      <button class="tb-btn active" id="btn-toggle-cut">✂️ 裁切線：開</button>
+      <a class="tb-btn" href="manual.html">📖 使用說明書</a>
+      <a class="tb-btn" href="index.html">🎮 互動轉盤</a>
+      <button class="tb-btn primary" id="btn-print">🖨️ 列印 / 另存 PDF</button>
+    </div>
+  </header>
+
+  <div class="print-notice no-print">
+    <strong>📏 精準 6.3 × 8.8 cm 列印設定提醒：</strong>
+    點擊「列印 / 另存 PDF」後，紙張請選 <strong>A4 直向</strong>、縮放比例務必選 <strong>「實際大小 / 100%」</strong>（切勿勾選符合頁面大小）、邊界選 <strong>「無」</strong>。
+    雙面列印請選 <strong>「長邊翻面」</strong>，本頁已自動為背面進行水平鏡像並精準置中，正反面可直接對齊！印出後可用直尺核對每頁上方的 <strong>5 公分校準條</strong>。
+  </div>
+
+  <main class="sheets-container" id="sheets-container"></main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const COLORS = [
+        { id: 'red',    name: '紅色', hex: '#ef4444', dark: '#b91c1c' },
+        { id: 'yellow', name: '黃色', hex: '#f59e0b', dark: '#b45309' },
+        { id: 'green',  name: '綠色', hex: '#22c55e', dark: '#15803d' },
+        { id: 'blue',   name: '藍色', hex: '#3b82f6', dark: '#1d4ed8' },
+      ];
+
+      const SHAPES = [
+        { id: 'circle',   name: '圓形' },
+        { id: 'triangle', name: '三角形' },
+        { id: 'square',   name: '正方形' },
+        { id: 'star',     name: '星形' },
+      ];
+
+      const YUMMY_TOPPINGS = [
+        { id: 'tomato',       name: '起司番茄披薩',   desc: '紅通通番茄加香濃起司，超好吃！' },
+        { id: 'pepperoni',    name: '義式臘腸披薩',   desc: '烤得香脆的圓圓臘腸，好香喔！' },
+        { id: 'hawaiian',     name: '夏威夷鳳梨披薩', desc: '酸甜黃金鳳梨配粉紅火腿！' },
+        { id: 'cornMushroom', name: '玉米蘑菇披薩',   desc: '金黃玉米粒和可愛小蘑菇！' },
+        { id: 'broccoli',     name: '翠綠花椰菜披薩', desc: '滿滿健康花椰菜，營養滿分！' },
+        { id: 'shrimp',       name: '鮮甜鮮蝦披薩',   desc: 'Q彈粉紅小蝦仁，海味大爆發！' },
+        { id: 'veggie',       name: '彩虹彩椒披薩',   desc: '繽紛彩椒加橄欖，像彩虹一樣！' },
+        { id: 'cheese',       name: '雙倍牽絲起司',   desc: '拉得好長好長的濃郁起司！' },
+      ];
+
+      const YUCKY_MAP = {
+        caterpillar: { id: 'caterpillar', name: '扭扭毛毛蟲',   desc: '毛毛蟲在披薩上散步，不能吃啦！' },
+        sock:        { id: 'sock',        name: '臭呼呼襪子',   desc: '誰把臭襪子烤進披薩裡了？！' },
+        spider:      { id: 'spider',      name: '害羞小蜘蛛',   desc: '大眼睛小蜘蛛在上面織網啦！' },
+        beetle:      { id: 'beetle',      name: '亮晶晶大甲蟲', desc: '大甲蟲偷跑來吃披薩了！' },
+        fishbone:    { id: 'fishbone',    name: '吃剩魚骨頭',   desc: '喵～這片只剩魚骨頭了！' },
+        slug:        { id: 'slug',        name: '黏呼呼小蛞蝓', desc: '黏答答小蛞蝓爬過披薩了！' },
+      };
+
+      // 8 張噁心配料均勻分配（每種顏色 2 張、每種形狀 2 張、每組最多 1 張）
+      const YUCKY_ASSIGNMENTS = {
+        'red-circle':      'caterpillar',
+        'red-triangle':    'sock',
+        'yellow-triangle': 'spider',
+        'yellow-square':   'beetle',
+        'green-square':    'fishbone',
+        'green-star':      'slug',
+        'blue-star':       'caterpillar',
+        'blue-circle':     'sock',
+      };
+
+      function shapeSVGPath(shapeId, cx, cy, r) {
+        switch (shapeId) {
+          case 'circle':
+            return `<circle cx="${cx}" cy="${cy}" r="${r}" />`;
+          case 'square': {
+            const s = r * 1.7;
+            return `<rect x="${cx - s / 2}" y="${cy - s / 2}" width="${s}" height="${s}" rx="${r * 0.22}" />`;
+          }
+          case 'triangle':
+            return `<polygon points="${cx},${cy - r * 1.12} ${cx + r * 1.08},${cy + r * 0.88} ${cx - r * 1.08},${cy + r * 0.88}" stroke-linejoin="round" />`;
+          case 'star': {
+            const pts = [];
+            for (let i = 0; i < 10; i++) {
+              const rad = i % 2 === 0 ? r * 1.18 : r * 0.52;
+              const a = (i * 36 - 90) * (Math.PI / 180);
+              pts.push(`${(cx + rad * Math.cos(a)).toFixed(1)},${(cy + rad * Math.sin(a)).toFixed(1)}`);
+            }
+            return `<polygon points="${pts.join(' ')}" stroke-linejoin="round" />`;
+          }
+          default: return '';
+        }
+      }
+
+      function renderSmallShapeSVG(shapeId, colorHex) {
+        return `<svg width="16" height="16" viewBox="0 0 40 40"><g fill="${colorHex}" stroke="#fff" stroke-width="2">${shapeSVGPath(shapeId, 20, 20, 14)}</g></svg>`;
+      }
+
+      function renderFrontSliceSVG(colorObj, shapeObj) {
+        return `
+          <svg viewBox="0 0 120 124">
+            <path d="M 14 26 Q 60 4 106 26 L 60 116 Z" fill="#e8a756" stroke="#b56f22" stroke-width="4" stroke-linejoin="round" />
+            <path d="M 22 33 Q 60 17 98 33 L 60 108 Z" fill="${colorObj.hex}" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" />
+            <circle cx="42" cy="40" r="3.5" fill="rgba(255,255,255,0.45)" />
+            <circle cx="78" cy="40" r="3.5" fill="rgba(255,255,255,0.45)" />
+            <g fill="#ffffff" stroke="${colorObj.dark}" stroke-width="3">
+              ${shapeSVGPath(shapeObj.id, 60, 62, 17)}
+            </g>
+          </svg>
+        `;
+      }
+
+      function toppingDetailSVG(toppingId, isYucky) {
+        if (!isYucky) {
+          switch (toppingId) {
+            case 'tomato':
+              return `
+                <circle cx="52" cy="52" r="11" fill="#ef4444" stroke="#b91c1c" stroke-width="2"/>
+                <circle cx="52" cy="52" r="5" fill="#fca5a5"/>
+                <circle cx="72" cy="64" r="10" fill="#ef4444" stroke="#b91c1c" stroke-width="2"/>
+                <circle cx="72" cy="64" r="4.5" fill="#fca5a5"/>
+                <ellipse cx="58" cy="82" rx="8" ry="4.5" transform="rotate(-25 58 82)" fill="#22c55e" stroke="#15803d" stroke-width="1.5"/>
+                <ellipse cx="44" cy="68" rx="6" ry="3.5" transform="rotate(20 44 68)" fill="#22c55e" stroke="#15803d" stroke-width="1.5"/>
+              `;
+            case 'pepperoni':
+              return `
+                <circle cx="47" cy="48" r="10" fill="#dc2626" stroke="#991b1b" stroke-width="2"/>
+                <circle cx="45" cy="46" r="2" fill="#fca5a5"/><circle cx="50" cy="51" r="1.8" fill="#fca5a5"/>
+                <circle cx="74" cy="50" r="10" fill="#dc2626" stroke="#991b1b" stroke-width="2"/>
+                <circle cx="72" cy="48" r="2" fill="#fca5a5"/><circle cx="77" cy="53" r="1.8" fill="#fca5a5"/>
+                <circle cx="60" cy="76" r="10.5" fill="#dc2626" stroke="#991b1b" stroke-width="2"/>
+                <circle cx="58" cy="74" r="2" fill="#fca5a5"/><circle cx="63" cy="79" r="1.8" fill="#fca5a5"/>
+              `;
+            case 'hawaiian':
+              return `
+                <polygon points="44,44 58,42 52,58" fill="#facc15" stroke="#ca8a04" stroke-width="2" stroke-linejoin="round"/>
+                <polygon points="68,48 82,46 75,62" fill="#facc15" stroke="#ca8a04" stroke-width="2" stroke-linejoin="round"/>
+                <polygon points="54,72 68,70 61,88" fill="#facc15" stroke="#ca8a04" stroke-width="2" stroke-linejoin="round"/>
+                <rect x="55" y="50" width="13" height="11" rx="3" transform="rotate(14 61 55)" fill="#fb7185" stroke="#e11d48" stroke-width="1.8"/>
+                <rect x="44" y="64" width="12" height="10" rx="3" transform="rotate(-12 50 69)" fill="#fb7185" stroke="#e11d48" stroke-width="1.8"/>
+              `;
+            case 'cornMushroom':
+              return `
+                <path d="M 42 52 Q 52 38 62 52 Z" fill="#d6c5b3" stroke="#856b52" stroke-width="2"/>
+                <rect x="49" y="51" width="6" height="8" rx="2" fill="#e7dacb" stroke="#856b52" stroke-width="1.5"/>
+                <path d="M 62 72 Q 71 60 80 72 Z" fill="#d6c5b3" stroke="#856b52" stroke-width="2"/>
+                <rect x="68" y="71" width="6" height="7" rx="2" fill="#e7dacb" stroke="#856b52" stroke-width="1.5"/>
+                <circle cx="72" cy="46" r="4.5" fill="#facc15" stroke="#ca8a04" stroke-width="1.5"/>
+                <circle cx="48" cy="70" r="4.5" fill="#facc15" stroke="#ca8a04" stroke-width="1.5"/>
+                <circle cx="58" cy="84" r="4.5" fill="#facc15" stroke="#ca8a04" stroke-width="1.5"/>
+                <circle cx="64" cy="56" r="4" fill="#facc15" stroke="#ca8a04" stroke-width="1.5"/>
+              `;
+            case 'broccoli':
+              return `
+                <rect x="47" y="52" width="6" height="10" rx="2" fill="#86efac" stroke="#15803d" stroke-width="1.5"/>
+                <circle cx="45" cy="49" r="7" fill="#22c55e" stroke="#15803d" stroke-width="1.8"/>
+                <circle cx="54" cy="48" r="7" fill="#16a34a" stroke="#15803d" stroke-width="1.8"/>
+                <rect x="67" y="58" width="6" height="9" rx="2" fill="#86efac" stroke="#15803d" stroke-width="1.5"/>
+                <circle cx="66" cy="54" r="6.5" fill="#22c55e" stroke="#15803d" stroke-width="1.8"/>
+                <circle cx="74" cy="54" r="6.5" fill="#16a34a" stroke="#15803d" stroke-width="1.8"/>
+                <circle cx="58" cy="79" r="7" fill="#ef4444" stroke="#b91c1c" stroke-width="1.8"/>
+              `;
+            case 'shrimp':
+              return `
+                <path d="M 45 55 C 40 42, 60 39, 60 51 C 60 56, 54 58, 52 54" fill="none" stroke="#fb7185" stroke-width="9" stroke-linecap="round"/>
+                <path d="M 45 55 C 40 42, 60 39, 60 51" fill="none" stroke="#fda4af" stroke-width="3" stroke-linecap="round"/>
+                <path d="M 56 80 C 52 68, 72 65, 72 77 C 72 82, 66 84, 64 80" fill="none" stroke="#fb7185" stroke-width="8.5" stroke-linecap="round"/>
+                <circle cx="74" cy="48" r="4" fill="#22c55e"/>
+                <circle cx="48" cy="70" r="3.5" fill="#22c55e"/>
+              `;
+            case 'veggie':
+              return `
+                <circle cx="48" cy="50" r="9" fill="none" stroke="#22c55e" stroke-width="5"/>
+                <circle cx="73" cy="52" r="9" fill="none" stroke="#f97316" stroke-width="5"/>
+                <circle cx="60" cy="75" r="8" fill="none" stroke="#ef4444" stroke-width="5"/>
+                <circle cx="59" cy="58" r="4.5" fill="#1f2937"/><circle cx="59" cy="58" r="1.8" fill="#fef08a"/>
+                <circle cx="66" cy="87" r="4" fill="#1f2937"/><circle cx="66" cy="87" r="1.5" fill="#fef08a"/>
+              `;
+            default:
+              return `
+                <circle cx="48" cy="50" r="10" fill="#fde047" stroke="#eab308" stroke-width="2"/>
+                <circle cx="72" cy="54" r="11" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+                <circle cx="59" cy="78" r="9" fill="#fef08a" stroke="#eab308" stroke-width="2"/>
+                <circle cx="58" cy="60" r="5" fill="#fb923c" opacity="0.6"/>
+              `;
+          }
+        } else {
+          switch (toppingId) {
+            case 'caterpillar':
+              return `
+                <circle cx="44" cy="52" r="9" fill="#84cc16" stroke="#3f6212" stroke-width="2.5"/>
+                <circle cx="56" cy="58" r="9" fill="#a3e635" stroke="#3f6212" stroke-width="2.5"/>
+                <circle cx="68" cy="52" r="9.5" fill="#84cc16" stroke="#3f6212" stroke-width="2.5"/>
+                <circle cx="60" cy="72" r="11" fill="#65a30d" stroke="#3f6212" stroke-width="2.5"/>
+                <circle cx="56" cy="70" r="3" fill="#fff"/><circle cx="56" cy="70" r="1.5" fill="#111"/>
+                <circle cx="64" cy="70" r="3" fill="#fff"/><circle cx="64" cy="70" r="1.5" fill="#111"/>
+                <path d="M 56 76 Q 60 80 64 76" fill="none" stroke="#3f6212" stroke-width="2" stroke-linecap="round"/>
+              `;
+            case 'sock':
+              return `
+                <path d="M 48 42 L 64 42 L 64 68 C 64 78, 76 74, 78 82 C 80 90, 56 90, 48 78 Z" fill="#a855f7" stroke="#581c87" stroke-width="2.5" stroke-linejoin="round"/>
+                <line x1="49" y1="50" x2="63" y2="50" stroke="#fde047" stroke-width="4"/>
+                <line x1="49" y1="58" x2="63" y2="58" stroke="#f472b6" stroke-width="4"/>
+                <path d="M 70 40 Q 75 34 70 28" fill="none" stroke="#65a30d" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M 78 46 Q 84 40 78 34" fill="none" stroke="#65a30d" stroke-width="2.5" stroke-linecap="round"/>
+              `;
+            case 'spider':
+              return `
+                <g stroke="#1f2937" stroke-width="2.5" fill="none" stroke-linecap="round">
+                  <path d="M 48 56 L 35 48"/><path d="M 47 62 L 34 62"/><path d="M 48 68 L 36 76"/>
+                  <path d="M 72 56 L 85 48"/><path d="M 73 62 L 86 62"/><path d="M 72 68 L 84 76"/>
+                </g>
+                <circle cx="60" cy="62" r="15" fill="#374151" stroke="#111827" stroke-width="2.5"/>
+                <circle cx="54" cy="59" r="4.5" fill="#fff"/><circle cx="55" cy="59" r="2.2" fill="#111"/>
+                <circle cx="66" cy="59" r="4.5" fill="#fff"/><circle cx="65" cy="59" r="2.2" fill="#111"/>
+                <path d="M 55 68 Q 60 72 65 68" fill="none" stroke="#f9a8d4" stroke-width="2" stroke-linecap="round"/>
+              `;
+            case 'beetle':
+              return `
+                <ellipse cx="60" cy="64" rx="14" ry="18" fill="#7c3aed" stroke="#3b0764" stroke-width="2.5"/>
+                <line x1="60" y1="48" x2="60" y2="82" stroke="#3b0764" stroke-width="2"/>
+                <circle cx="53" cy="60" r="3" fill="#c4b5fd"/><circle cx="67" cy="68" r="3" fill="#c4b5fd"/>
+                <circle cx="60" cy="46" r="8" fill="#4c1d95"/>
+                <circle cx="57" cy="44" r="2.2" fill="#fff"/><circle cx="63" cy="44" r="2.2" fill="#fff"/>
+              `;
+            case 'fishbone':
+              return `
+                <g stroke="#475569" stroke-width="3" fill="#e2e8f0" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="40,56 54,48 54,64"/>
+                  <line x1="54" y1="56" x2="78" y2="74"/>
+                  <line x1="58" y1="50" x2="54" y2="66"/>
+                  <line x1="65" y1="55" x2="61" y2="71"/>
+                  <line x1="72" y1="60" x2="68" y2="76"/>
+                  <polygon points="78,74 86,68 82,82"/>
+                  <circle cx="48" cy="54" r="2" fill="#1e293b"/>
+                </g>
+              `;
+            default:
+              return `
+                <path d="M 42 74 C 42 54, 58 46, 68 58 C 76 68, 78 78, 66 80 C 54 82, 42 82, 42 74 Z" fill="#84cc16" stroke="#3f6212" stroke-width="2.5"/>
+                <line x1="50" y1="54" x2="46" y2="42" stroke="#3f6212" stroke-width="2.5"/>
+                <line x1="58" y1="52" x2="60" y2="40" stroke="#3f6212" stroke-width="2.5"/>
+                <circle cx="46" cy="42" r="4" fill="#fff" stroke="#3f6212" stroke-width="1.8"/><circle cx="46" cy="42" r="1.8" fill="#111"/>
+                <circle cx="60" cy="40" r="4" fill="#fff" stroke="#3f6212" stroke-width="1.8"/><circle cx="60" cy="40" r="1.8" fill="#111"/>
+              `;
+          }
+        }
+      }
+
+      function renderBackSliceSVG(toppingId, isYucky) {
+        const baseFill = isYucky ? '#d9f99d' : '#fde047';
+        const sauceFill = isYucky ? '#a3e635' : '#ef4444';
+        return `
+          <svg viewBox="0 0 120 124">
+            <path d="M 10 26 Q 60 2 110 26 L 60 118 Z" fill="#e8a756" stroke="#b56f22" stroke-width="4" stroke-linejoin="round" />
+            <path d="M 19 33 Q 60 16 101 33 L 60 109 Z" fill="${sauceFill}" />
+            <path d="M 23 36 Q 60 21 97 36 L 60 104 Z" fill="${baseFill}" />
+            ${toppingDetailSVG(toppingId, isYucky)}
+          </svg>
+        `;
+      }
+
+      // 建構全套 36 張牌
+      function buildDeck() {
+        const deck = [];
+        let yummyIdx = 0;
+        let cardNo = 1;
+
+        COLORS.forEach((color) => {
+          SHAPES.forEach((shape) => {
+            const key = `${color.id}-${shape.id}`;
+            // 第一張：若在噁心分配表中則為噁心，否則美味
+            if (YUCKY_ASSIGNMENTS[key]) {
+              deck.push({
+                num: String(cardNo++).padStart(2, '0'),
+                kind: 'pizza',
+                color,
+                shape,
+                isYucky: true,
+                topping: YUCKY_MAP[YUCKY_ASSIGNMENTS[key]],
+              });
+            } else {
+              deck.push({
+                num: String(cardNo++).padStart(2, '0'),
+                kind: 'pizza',
+                color,
+                shape,
+                isYucky: false,
+                topping: YUMMY_TOPPINGS[yummyIdx++ % YUMMY_TOPPINGS.length],
+              });
+            }
+            // 第二張：保證為美味配料
+            deck.push({
+              num: String(cardNo++).padStart(2, '0'),
+              kind: 'pizza',
+              color,
+              shape,
+              isYucky: false,
+              topping: YUMMY_TOPPINGS[yummyIdx++ % YUMMY_TOPPINGS.length],
+            });
+          });
+        });
+
+        // 第 33、34 張：主廚萬能披薩卡
+        for (let w = 0; w < 2; w++) {
+          deck.push({
+            num: String(cardNo++).padStart(2, '0'),
+            kind: 'wild',
+          });
+        }
+        // 第 35 張：實體垃圾桶基地卡
+        deck.push({
+          num: String(cardNo++).padStart(2, '0'),
+          kind: 'trash',
+        });
+        // 第 36 張：互動網站轉盤連動卡
+        deck.push({
+          num: String(cardNo++).padStart(2, '0'),
+          kind: 'web',
+        });
+
+        return deck;
+      }
+
+      function renderCardFront(card) {
+        if (card.kind === 'pizza') {
+          return `
+            <div class="card card-front">
+              <div class="card-inner">
+                <div class="corner-badge corner-tl">
+                  <span class="corner-dot" style="background:${card.color.hex}"></span>
+                  ${renderSmallShapeSVG(card.shape.id, card.color.hex)}
+                </div>
+                <div class="corner-badge corner-br">
+                  <span class="corner-dot" style="background:${card.color.hex}"></span>
+                  ${renderSmallShapeSVG(card.shape.id, card.color.hex)}
+                </div>
+                <div class="front-header">🍕 比薩拼圖 Pizza!</div>
+                <div class="front-art">${renderFrontSliceSVG(card.color, card.shape)}</div>
+                <div class="front-label" style="background:${card.color.hex}">${card.color.name}・${card.shape.name}</div>
+                <div class="front-foot">翻過來看看是什麼配料！</div>
+                <span class="card-num">#${card.num}</span>
+              </div>
+            </div>
+          `;
+        }
+
+        if (card.kind === 'wild') {
+          return `
+            <div class="card card-front card-special-wild">
+              <div class="card-inner">
+                <div class="front-header">✨ 特別驚喜卡</div>
+                <div style="font-size:34pt;line-height:1">🌈🍕</div>
+                <div class="back-title">彩虹萬能披薩</div>
+                <div class="back-desc">不管轉盤轉到什麼顏色或形狀，都可以翻開這張幸運牌！</div>
+                <div class="front-label" style="background:#f59e0b">萬能顏色・萬能形狀</div>
+                <span class="card-num">#${card.num}</span>
+              </div>
+            </div>
+          `;
+        }
+
+        if (card.kind === 'trash') {
+          return `
+            <div class="card card-front card-special-trash">
+              <div class="card-inner">
+                <div class="front-header">🗑️ 放桌中央使用</div>
+                <div style="font-size:38pt;line-height:1">🗑️</div>
+                <div class="back-title" style="color:#5b21b6">噁心配料垃圾桶</div>
+                <div class="back-desc">翻到毛毛蟲、臭襪子、蜘蛛、魚骨頭時，大喊「好噁心喔！」然後拍丟在這裡！</div>
+                <div class="front-label" style="background:#7c3aed">實體垃圾桶基地卡</div>
+                <span class="card-num">#${card.num}</span>
+              </div>
+            </div>
+          `;
+        }
+
+        // 數位連動卡
+        const liveUrl = 'https://sunking2121-hub.github.io/pizza-pizza-game/';
+        const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=6&data=${encodeURIComponent(liveUrl)}`;
+        return `
+          <div class="card card-front card-special-web">
+            <div class="card-inner">
+              <div class="front-header" style="color:#b91c1c">📱 搭配網頁雙轉盤玩</div>
+              <div class="qr-box">
+                <img src="${qrSrc}" alt="比薩拼圖互動網頁 QR Code" onerror="this.outerHTML='<div style=font-size:28pt>🎯🍕</div>'" />
+              </div>
+              <div class="back-title" style="font-size:10pt">比薩拼圖數位轉盤</div>
+              <div class="url-chip">sunking2121-hub.github.io/pizza-pizza-game</div>
+              <div class="front-foot">手機掃描開啟聲光語音轉盤！</div>
+              <span class="card-num">#${card.num}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderCardBack(card) {
+        if (card.kind === 'pizza') {
+          const cls = card.isYucky ? 'is-yucky' : 'is-yummy';
+          const badge = card.isYucky ? '😝 哎呀！噁心配料！' : '😋 太棒了！美味配料！';
+          const action = card.isYucky ? '🗑️ 哈哈大笑丟進垃圾桶！' : '🍕 收進我的披薩盤（+1片）';
+          return `
+            <div class="card card-back ${cls}">
+              <div class="card-inner">
+                <div class="back-pill">${badge}</div>
+                <div class="back-art">${renderBackSliceSVG(card.topping.id, card.isYucky)}</div>
+                <div class="back-title">${card.topping.name}</div>
+                <div class="back-desc">${card.topping.desc}</div>
+                <div class="back-action">${action}</div>
+                <span class="card-num">#${card.num}</span>
+              </div>
+            </div>
+          `;
+        }
+
+        if (card.kind === 'wild') {
+          return `
+            <div class="card card-back card-special-wild">
+              <div class="card-inner">
+                <div class="back-pill" style="background:#fef3c7;color:#92400e;border:0.4mm solid #f59e0b">👑 主廚大獎勵！</div>
+                <div style="font-size:36pt;line-height:1">👨‍🍳🍕</div>
+                <div class="back-title">豪華主廚全餐披薩</div>
+                <div class="back-desc">太幸運了！大廚送你一片超級美味的招牌披薩！</div>
+                <div class="back-action" style="background:#f59e0b">🌟 直接算 1 片美味披薩！</div>
+                <span class="card-num">#${card.num}</span>
+              </div>
+            </div>
+          `;
+        }
+
+        if (card.kind === 'trash') {
+          return `
+            <div class="card card-back card-special-trash">
+              <div class="card-inner">
+                <div class="back-pill" style="background:#ddd6fe;color:#5b21b6">😝 垃圾桶滿出來啦</div>
+                <div style="font-size:36pt;line-height:1">🐛🧦🕷️</div>
+                <div class="back-title" style="color:#5b21b6">垃圾桶蓋起來！</div>
+                <div class="back-desc">所有噁心配料都疊在這張牌上，結束時可以數數看大家一共丟了幾片！</div>
+                <div class="back-action" style="background:#7c3aed">本張不洗入牌堆</div>
+                <span class="card-num">#${card.num}</span>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="card card-back card-special-web">
+            <div class="card-inner">
+              <div class="back-pill" style="background:#fee2e2;color:#b91c1c">🎲 三種玩法速查</div>
+              <div class="back-title" style="font-size:10pt">實體 × 網頁怎麼搭？</div>
+              <div class="back-desc" style="text-align:left;font-size:7pt;line-height:1.45">
+                <strong>1. 虛實雙轉盤：</strong>開網頁按轉盤，小朋友在桌上找對應實體卡！<br/>
+                <strong>2. 純卡牌模式：</strong>翻牌堆頂張當目標，找同色或同形狀的牌！<br/>
+                <strong>3. 勝利條件：</strong>先收集滿 <strong>6 片美味披薩</strong>就獲勝！
+              </div>
+              <div class="back-action" style="background:#ef4444">📖 詳見隨附使用說明書</div>
+              <span class="card-num">#${card.num}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // 雙面長邊翻面時，每列 3 張水平鏡像 [0,1,2] -> [2,1,0]
+      function mirrorRowsForDuplex(nineCards) {
+        const out = [];
+        for (let r = 0; r < 3; r++) {
+          const row = nineCards.slice(r * 3, r * 3 + 3);
+          out.push(row[2], row[1], row[0]);
+        }
+        return out;
+      }
+
+      function renderAllSheets() {
+        const deck = buildDeck();
+        const container = document.getElementById('sheets-container');
+        container.innerHTML = '';
+
+        const totalSets = 4; // 36 張 / 9 張 = 4 組（每組 1 頁正面 + 1 頁鏡像背面）
+        for (let s = 0; s < totalSets; s++) {
+          const group = deck.slice(s * 9, (s + 1) * 9);
+          const startNum = group[0].num;
+          const endNum = group[group.length - 1].num;
+
+          // 正面頁（配對面）
+          const frontSheet = document.createElement('section');
+          frontSheet.className = 'a4-sheet sheet-front';
+          frontSheet.innerHTML = `
+            <div class="sheet-header">
+              <span>🍕 比薩拼圖實體卡牌｜第 ${s + 1}/${totalSets} 組【正面：顏色・形狀配對面】（#${startNum}–#${endNum}）</span>
+              <span class="ruler-5cm">5cm 校準尺 <span class="ruler-bar"></span></span>
+            </div>
+            <div class="cards-grid">
+              ${group.map((c) => renderCardFront(c)).join('')}
+            </div>
+            <div class="sheet-footer">
+              <span>單張實寸：寬 6.3 cm × 高 8.8 cm（適用標準 65×90mm 桌遊牌套）</span>
+              <span>第 ${s * 2 + 1} 頁 / 共 8 頁</span>
+            </div>
+          `;
+          container.appendChild(frontSheet);
+
+          // 背面頁（翻開驚喜面，水平鏡像以利雙面列印對齊）
+          const mirrored = mirrorRowsForDuplex(group);
+          const backSheet = document.createElement('section');
+          backSheet.className = 'a4-sheet sheet-back';
+          backSheet.innerHTML = `
+            <div class="sheet-header">
+              <span>🍕 比薩拼圖實體卡牌｜第 ${s + 1}/${totalSets} 組【背面：翻開配料面（已水平鏡像供雙面列印）】</span>
+              <span>雙面列印請選「長邊翻面」</span>
+            </div>
+            <div class="cards-grid">
+              ${mirrored.map((c) => renderCardBack(c)).join('')}
+            </div>
+            <div class="sheet-footer">
+              <span>單張實寸：寬 6.3 cm × 高 8.8 cm｜列印縮放比例請務必選擇 100% 實際大小</span>
+              <span>第 ${s * 2 + 2} 頁 / 共 8 頁</span>
+            </div>
+          `;
+          container.appendChild(backSheet);
+        }
+      }
+
+      // 控制列按鈕
+      document.querySelectorAll('[data-view]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-view]').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          document.body.classList.remove('mode-front-only', 'mode-back-only');
+          if (btn.dataset.view === 'front') document.body.classList.add('mode-front-only');
+          if (btn.dataset.view === 'back') document.body.classList.add('mode-back-only');
+        });
+      });
+
+      const btnCut = document.getElementById('btn-toggle-cut');
+      btnCut.addEventListener('click', () => {
+        const on = document.body.classList.toggle('show-cutlines');
+        btnCut.classList.toggle('active', on);
+        btnCut.textContent = on ? '✂️ 裁切線：開' : '✂️ 裁切線：關';
+      });
+
+      document.getElementById('btn-print').addEventListener('click', () => window.print());
+
+      renderAllSheets();
+    })();
+  </script>
+</body>
+</html>
