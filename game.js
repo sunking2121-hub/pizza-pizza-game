@@ -43,11 +43,10 @@
     { id: 'slug',        name: '黏呼呼小蛞蝓', desc: '黏答答的小蛞蝓爬過披薩了，好噁心喔！快丟進垃圾桶！' },
   ];
 
-  const SLICES_TO_WIN = 6;
-
   // ==================== 狀態管理 ====================
   const state = {
     mode: 'either', // 'either' (基礎) | 'both' (挑戰)
+    slicesToWin: 6, // 4 | 6 | 8
     playerCount: 2,
     withBot: false,
     soundOn: true,
@@ -103,6 +102,7 @@
 
   const elSlicesGrid = $('#slices-grid');
   const elDeckStatus = $('#deck-status');
+  const elBoardsPanelTitle = $('#boards-panel-title');
   const elPlayerBoards = $('#player-boards');
 
   const elModalReveal = $('#modal-reveal');
@@ -498,17 +498,22 @@
     `;
   }
 
-  // 繪製玩家面前的 6 等份圓形木頭披薩盤
-  function renderPlayerPlateSVG(collectedSlices, popLastIndex = -1) {
+  // 繪製玩家面前的 4 / 6 / 8 等份圓形木頭披薩盤
+  function renderPlayerPlateSVG(collectedSlices, popLastIndex = -1, totalSlots = state.slicesToWin) {
     let wedges = '';
     const cx = 100;
     const cy = 100;
     const rOuter = 82;
     const rCheese = 70;
+    const wedgeDeg = 360 / totalSlots;
+    const dotR1 = totalSlots === 8 ? 7.5 : (totalSlots === 4 ? 11 : 9);
+    const dotR2 = totalSlots === 8 ? 4.5 : (totalSlots === 4 ? 6.8 : 5.5);
+    const dist1 = totalSlots === 8 ? 48 : 44;
+    const dist2 = totalSlots === 8 ? 28 : 26;
 
-    for (let i = 0; i < SLICES_TO_WIN; i++) {
-      const startDeg = i * 60 - 90;
-      const endDeg = startDeg + 60;
+    for (let i = 0; i < totalSlots; i++) {
+      const startDeg = i * wedgeDeg - 90;
+      const endDeg = startDeg + wedgeDeg;
       const rad1 = (startDeg * Math.PI) / 180;
       const rad2 = (endDeg * Math.PI) / 180;
       const x1 = cx + rOuter * Math.cos(rad1);
@@ -527,11 +532,11 @@
         const cy1 = cy + rCheese * Math.sin(rad1);
         const cx2 = cx + rCheese * Math.cos(rad2);
         const cy2 = cy + rCheese * Math.sin(rad2);
-        const midRad = ((startDeg + 30) * Math.PI) / 180;
-        const tx = cx + 44 * Math.cos(midRad);
-        const ty = cy + 44 * Math.sin(midRad);
-        const t2x = cx + 26 * Math.cos(midRad);
-        const t2y = cy + 26 * Math.sin(midRad);
+        const midRad = ((startDeg + wedgeDeg / 2) * Math.PI) / 180;
+        const tx = cx + dist1 * Math.cos(midRad);
+        const ty = cy + dist1 * Math.sin(midRad);
+        const t2x = cx + dist2 * Math.cos(midRad);
+        const t2y = cy + dist2 * Math.sin(midRad);
 
         const dotColors = {
           tomato: ['#ef4444', '#22c55e'],
@@ -551,8 +556,8 @@
               fill="#e8a756" stroke="#b56f22" stroke-width="2.5" />
             <path d="M ${cx} ${cy} L ${cx1.toFixed(1)} ${cy1.toFixed(1)} A ${rCheese} ${rCheese} 0 0 1 ${cx2.toFixed(1)} ${cy2.toFixed(1)} Z"
               fill="#fde047" stroke="#ef4444" stroke-width="2" />
-            <circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="9" fill="${dotColors[0]}" stroke="#fff" stroke-width="1.5" />
-            <circle cx="${t2x.toFixed(1)}" cy="${t2y.toFixed(1)}" r="5.5" fill="${dotColors[1]}" />
+            <circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${dotR1}" fill="${dotColors[0]}" stroke="#fff" stroke-width="1.5" />
+            <circle cx="${t2x.toFixed(1)}" cy="${t2y.toFixed(1)}" r="${dotR2}" fill="${dotColors[1]}" />
           </g>
         `;
       }
@@ -738,6 +743,7 @@
     elTrashCount.textContent = '已丟 0 片';
     elTrashHint.textContent = '翻到毛毛蟲或臭襪子時，點我丟進來！';
     elTrashStation.classList.remove('highlight-trash');
+    elBoardsPanelTitle.textContent = `👨‍🍳 小廚師們的披薩盤（拼滿 ${state.slicesToWin} 塊就贏囉！）`;
 
     showScreen('game');
     renderGameUI();
@@ -900,7 +906,7 @@
             <span class="board-avatar">${p.avatar}</span>
             <span>${p.name}</span>
           </div>
-          <span class="board-progress">${p.slices.length} / ${SLICES_TO_WIN} 片</span>
+          <span class="board-progress">${p.slices.length} / ${state.slicesToWin} 塊</span>
         </div>
         ${renderPlayerPlateSVG(p.slices, animIdx)}
       `;
@@ -1002,12 +1008,12 @@
     replenishSliceAt(sliceIdx);
     renderGameUI(newSlicePos);
 
-    if (p.slices.length >= SLICES_TO_WIN) {
+    if (p.slices.length >= state.slicesToWin) {
       triggerVictory(p);
       return;
     }
 
-    showToast(`🍕 ${p.name} 收集到第 ${p.slices.length} 片美味披薩！`, 1600);
+    showToast(`🍕 ${p.name} 收集到第 ${p.slices.length} 塊美味披薩！`, 1600);
     advanceTurn();
   }
 
@@ -1051,16 +1057,16 @@
     startConfetti();
 
     elVictoryTitle.textContent = `${winner.avatar} ${winner.name} 完成了美味大披薩！`;
-    elVictorySubtitle.textContent = '太厲害了！6 片美味配料全部拼滿，你是今天的披薩大冠軍！';
+    elVictorySubtitle.textContent = `太厲害了！${state.slicesToWin} 塊美味配料全部拼滿，你是今天的披薩大冠軍！`;
     elVictoryShowcase.innerHTML = renderPlayerPlateSVG(winner.slices);
     elVictoryStats.innerHTML = `
-      <span class="stat-pill">🍕 收集 ${winner.slices.length} 片美味披薩</span>
-      <span class="stat-pill">🗑️ 垃圾桶吃掉 ${state.trashCount} 片噁心配料</span>
+      <span class="stat-pill">🍕 收集 ${winner.slices.length} 塊美味披薩</span>
+      <span class="stat-pill">🗑️ 垃圾桶吃掉 ${state.trashCount} 塊噁心配料</span>
       <span class="stat-pill">🎯 共轉了 ${state.turnsPlayed} 次轉盤</span>
     `;
 
     elModalVictory.classList.remove('hidden');
-    speak(`恭喜${winner.name}！完成了六片美味大披薩，太厲害了！`);
+    speak(`恭喜${winner.name}！完成了${state.slicesToWin}塊美味大披薩，太厲害了！`);
   }
 
   // ==================== 溫柔小提示 ====================
@@ -1158,6 +1164,17 @@
       });
     });
 
+    // 完成的披薩塊數選擇（4 / 6 / 8）
+    $$('#slice-count-options .slice-choice').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        $$('#slice-count-options .slice-choice').forEach((b) => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        state.slicesToWin = Number(btn.dataset.slices);
+        playTone(640, 0.08, 'triangle', 0.13);
+        renderHeroPizzaPreview();
+      });
+    });
+
     elChkWithBot.addEventListener('change', () => {
       state.withBot = elChkWithBot.checked;
       renderPlayerConfigs();
@@ -1230,16 +1247,16 @@
     });
   }
 
+  function renderHeroPizzaPreview() {
+    const sampleSlices = Array.from({ length: state.slicesToWin }, (_, i) => ({
+      topping: YUMMY_TOPPINGS[i % YUMMY_TOPPINGS.length],
+    }));
+    elHeroPizzaArt.innerHTML = renderPlayerPlateSVG(sampleSlices, -1, state.slicesToWin);
+  }
+
   function init() {
-    // 首頁裝飾披薩圖
-    elHeroPizzaArt.innerHTML = renderPlayerPlateSVG([
-      { topping: YUMMY_TOPPINGS[0] },
-      { topping: YUMMY_TOPPINGS[2] },
-      { topping: YUMMY_TOPPINGS[4] },
-      { topping: YUMMY_TOPPINGS[1] },
-      { topping: YUMMY_TOPPINGS[5] },
-      { topping: YUMMY_TOPPINGS[3] },
-    ]);
+    // 首頁裝飾披薩圖（會跟著 4 / 6 / 8 塊即時預覽）
+    renderHeroPizzaPreview();
     buildWheels();
     renderPlayerConfigs();
     bindEvents();

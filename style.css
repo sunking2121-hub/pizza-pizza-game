@@ -252,6 +252,16 @@ html, body {
   gap: 10px;
 }
 
+.slice-count-box {
+  margin-bottom: 18px;
+}
+
+.slice-count-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
 .choice-card {
   display: flex;
   flex-direction: column;
@@ -1336,7 +1346,8 @@ html, body {
     padding: 16px;
   }
 
-  .mode-options {
+  .mode-options,
+  .slice-count-options {
     grid-template-columns: 1fr;
   }
 

@@ -94,9 +94,31 @@
           </div>
         </div>
 
+        <!-- 完成的披薩塊數 -->
+        <div class="setup-box slice-count-box">
+          <h3>3. 選擇完成的披薩塊數</h3>
+          <div class="slice-count-options" id="slice-count-options">
+            <button class="choice-card slice-choice" data-slices="4">
+              <span class="choice-icon">🍕</span>
+              <strong>4 塊（快速幼幼版）</strong>
+              <small>每塊大大片，約 5 分鐘就能開心完成！</small>
+            </button>
+            <button class="choice-card slice-choice selected" data-slices="6">
+              <span class="choice-icon">🍕</span>
+              <strong>6 塊（經典標準版）</strong>
+              <small>最剛好的節奏，親子共玩推薦！</small>
+            </button>
+            <button class="choice-card slice-choice" data-slices="8">
+              <span class="choice-icon">🍕</span>
+              <strong>8 塊（大胃王挑戰版）</strong>
+              <small>滿滿 8 塊豪華大披薩，玩得更過癮！</small>
+            </button>
+          </div>
+        </div>
+
         <!-- 玩家角色設定 -->
         <div class="setup-box players-setup-box">
-          <h3>3. 幫小廚師挑頭像與名字</h3>
+          <h3>4. 幫小廚師挑頭像與名字</h3>
           <div class="players-config-list" id="players-config-list"></div>
         </div>
 
@@ -191,7 +213,7 @@
         <!-- 右欄／下方：所有玩家的披薩盤 -->
         <section class="boards-panel">
           <div class="panel-header">
-            <h3>👨‍🍳 小廚師們的披薩盤（拼滿 6 片就贏囉！）</h3>
+            <h3 id="boards-panel-title">👨‍🍳 小廚師們的披薩盤（拼滿 6 塊就贏囉！）</h3>
           </div>
           <div class="player-boards" id="player-boards"></div>
         </section>
@@ -255,8 +277,8 @@
         <li>
           <span class="step-num">4</span>
           <div>
-            <strong>拼滿 6 片就獲勝！</strong>
-            <p>最快把自己的大披薩拼滿 6 片美味配料的小廚師就是今天的披薩冠軍！</p>
+            <strong>拼滿指定塊數就獲勝！</strong>
+            <p>開局可自由選擇 <strong>4 塊、6 塊或 8 塊</strong>，最快把自己的大披薩拼滿的小廚師就是今天的披薩冠軍！</p>
           </div>
         </li>
       </ol>
